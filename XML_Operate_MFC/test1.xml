@@ -1,0 +1,27 @@
+<Root>
+    <IntValue year="2017" key="hello">10</IntValue>
+    <Node1>
+        <Node11>
+            <Node111>
+                <value1>1</value1>
+                <value2>2</value2>
+            </Node111>
+            <Node112>
+                <value1>1</value1>
+                <value2>2</value2>
+            </Node112>
+        </Node11>
+        <Node12>
+            <Node121>
+                <value1>1</value1>
+                <value2>2</value2>
+            </Node121>
+            <Node122>
+                <value1>112345</value1>
+                <value2>2</value2>
+            </Node122>
+        </Node12>
+        <value1>1</value1>
+        <value2>2</value2>
+    </Node1>
+</Root>
