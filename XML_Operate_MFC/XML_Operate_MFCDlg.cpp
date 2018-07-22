@@ -20,13 +20,7 @@
 vector<string> g_strAllRightFilePath;
 
 /*****************************全局变量************************************/
-typedef enum ENUM_TYPE_OPREATER
-{
-	GET_NODE_VALUE = 0,
-	SET_NODE_VALUE,
-	ADD_NODE,
-	DEL_NODE
-}ENUM_TYPE_OPREATER_E;
+
 
 
 // 用于应用程序“关于”菜单项的 CAboutDlg 对话框
@@ -380,14 +374,20 @@ void CXML_Operate_MFCDlg::OnBnClickedGetNodeValue()
 //			CString cstrOutPutString = _T("hello\nworld347\n");
 //			GetDlgItem(IDC_EDIT_OPERATION_RECORD)->SetWindowText(cstrOutPutString);
 			char *chTempOperationRecord = (char *)malloc(sizeof(char) * (MAX_NODE_PATH_LENGTH + MAX_FILE_NUM));
-			sprintf_s(chTempOperationRecord, (MAX_NODE_PATH_LENGTH + MAX_FILE_NUM), "Get <%S> From <%s> Success Success\r\n", strNodePath, g_strAllRightFilePath[i].data());
+			sprintf_s(chTempOperationRecord, (MAX_NODE_PATH_LENGTH + MAX_FILE_NUM), "Get <%S> From <%s> Success\r\n", strNodePath, g_strAllRightFilePath[i].data());
 			m_OperationRecord += chTempOperationRecord;
 			GetDlgItem(IDC_EDIT_OPERATION_RECORD)->UpdateWindow();
+			m_EditOperationRecord.PostMessage(WM_VSCROLL, SB_BOTTOM, 0);
 			UpdateData(false);
 		}
 		else
 		{
-			MessageBox(_T("GetValue From Xml File Fail!"), _T("错误"), MB_OK | MB_ICONEXCLAMATION);
+			char *chTempOperationRecord = (char *)malloc(sizeof(char) * (MAX_NODE_PATH_LENGTH + MAX_FILE_NUM));
+			sprintf_s(chTempOperationRecord, (MAX_NODE_PATH_LENGTH + MAX_FILE_NUM), "Get <%S> To <%s> Fail! Err Code is:%d\r\n", strNodePath, g_strAllRightFilePath[i].data(), enRet);
+			m_OperationRecord += chTempOperationRecord;
+			GetDlgItem(IDC_EDIT_OPERATION_RECORD)->UpdateWindow();
+			m_EditOperationRecord.PostMessage(WM_VSCROLL, SB_BOTTOM, 0);
+			UpdateData(false);
 		}
 		//	m_EditNodeValueNow.SetWindowTextW(LPCTSTR(szElementValue));
 		//	string strElementValue = szElementValue;
@@ -400,6 +400,7 @@ void CXML_Operate_MFCDlg::OnBnClickedGetNodeValue()
 			szElementValue = NULL;
 		}
 	}
+	MessageBox(_T("Get Value From XML Files Finish!"), _T("Finish"), MB_OK);
 	if (NULL != stXmlFile)
 	{
 		delete stXmlFile;
@@ -465,14 +466,23 @@ void CXML_Operate_MFCDlg::OnBnClickedChangeNodeValue()
 			enRet = SetValueToXmlFile(pRoot, "Node1;Node12;Node122;value1", "123467890");
 			if (RESULT_SUCCESS != enRet)
 			{
-				MessageBox(_T("Set Value To Xml File Fail!"), _T("错误"), MB_OK | MB_ICONEXCLAMATION);
+				char *chTempOperationRecord = (char *)malloc(sizeof(char) * (MAX_NODE_PATH_LENGTH + MAX_FILE_NUM));
+				sprintf_s(chTempOperationRecord, (MAX_NODE_PATH_LENGTH + MAX_FILE_NUM), "Set <%S> To <%s> Fail! Err Code is:%d\r\n", strNodePath, g_strAllRightFilePath[i].data(), enRet);
+				m_OperationRecord += chTempOperationRecord;
+				GetDlgItem(IDC_EDIT_OPERATION_RECORD)->UpdateWindow();
+				m_EditOperationRecord.PostMessage(WM_VSCROLL, SB_BOTTOM, 0);
+				UpdateData(false);
 				break;
 			}
 			else
 			{
-				CString strElementValue("12346789");
-				GetDlgItem(IDC_NODE_VALUE_NEW)->SetWindowText(strElementValue);
-				MessageBox(_T("Set Value To Xml File Success!"), _T("成功"), MB_OK);
+				char *chTempOperationRecord = (char *)malloc(sizeof(char) * (MAX_NODE_PATH_LENGTH + MAX_FILE_NUM));
+				sprintf_s(chTempOperationRecord, (MAX_NODE_PATH_LENGTH + MAX_FILE_NUM), "Set <%S> To <%s> Success!\r\n", strNodePath, g_strAllRightFilePath[i].data());
+				m_OperationRecord += chTempOperationRecord;
+				GetDlgItem(IDC_EDIT_OPERATION_RECORD)->UpdateWindow();
+				m_EditOperationRecord.PostMessage(WM_VSCROLL, SB_BOTTOM, 0);
+				UpdateData(false);
+				break;
 			}
 			stXmlFile->SaveFile();
 			if (NULL != stXmlFile)
@@ -484,7 +494,7 @@ void CXML_Operate_MFCDlg::OnBnClickedChangeNodeValue()
 		
 	}
 //	delete[]stXmlFile;
-	
+	MessageBox(_T("Set Value To XML Files Finish!"), _T("Finish"), MB_OK);
 }
 
 void CXML_Operate_MFCDlg::OnBnClickedAddNode()
@@ -539,11 +549,21 @@ void CXML_Operate_MFCDlg::OnBnClickedAddNode()
 		enRet = AddNodeToXml(pRoot, szNodePath, "value111", "13254235");
 		if (RESULT_SUCCESS != enRet)
 		{
-			MessageBox(_T("Add Node To Xml Fail!"), _T("错误"), MB_OK | MB_ICONEXCLAMATION);
+			char *chTempOperationRecord = (char *)malloc(sizeof(char) * (MAX_NODE_PATH_LENGTH + MAX_FILE_NUM));
+			sprintf_s(chTempOperationRecord, (MAX_NODE_PATH_LENGTH + MAX_FILE_NUM), "Add <%S> To <%s> Fail! Err Code is:%d\r\n", strNodePath, g_strAllRightFilePath[i].data(), enRet);
+			m_OperationRecord += chTempOperationRecord;
+			GetDlgItem(IDC_EDIT_OPERATION_RECORD)->UpdateWindow();
+			m_EditOperationRecord.PostMessage(WM_VSCROLL, SB_BOTTOM, 0);
+			UpdateData(false);
 		}
 		else
 		{
-			MessageBox(_T("Add Node To Xml Success!"), _T("成功"), MB_OK);
+			char *chTempOperationRecord = (char *)malloc(sizeof(char) * (MAX_NODE_PATH_LENGTH + MAX_FILE_NUM));
+			sprintf_s(chTempOperationRecord, (MAX_NODE_PATH_LENGTH + MAX_FILE_NUM), "Add <%S> To <%s> Success!\r\n", strNodePath, g_strAllRightFilePath[i].data());
+			m_OperationRecord += chTempOperationRecord;
+			GetDlgItem(IDC_EDIT_OPERATION_RECORD)->UpdateWindow();
+			m_EditOperationRecord.PostMessage(WM_VSCROLL, SB_BOTTOM, 0);
+			UpdateData(false);
 		}
 
 		stXmlFile->SaveFile();
@@ -553,7 +573,7 @@ void CXML_Operate_MFCDlg::OnBnClickedAddNode()
 			stXmlFile = NULL;
 		}
 	}
-	
+	MessageBox(_T("Add Node To XML Files Finish!"), _T("Finish"), MB_OK);
 }
 
 
@@ -610,7 +630,21 @@ void CXML_Operate_MFCDlg::OnBnClickedDelNode()
 		enRet = DelNodeFromXml(pRoot, szNodePath);
 		if (RESULT_SUCCESS != enRet)
 		{
-			MessageBox(_T("Del Node From Xml Fail!"), _T("错误"), MB_OK | MB_ICONEXCLAMATION);
+			char *chTempOperationRecord = (char *)malloc(sizeof(char) * (MAX_NODE_PATH_LENGTH + MAX_FILE_NUM));
+			sprintf_s(chTempOperationRecord, (MAX_NODE_PATH_LENGTH + MAX_FILE_NUM), "Delete <%S> From <%s> Fail! Err Code is:%d\r\n", strNodePath, g_strAllRightFilePath[i].data(), enRet);
+			m_OperationRecord += chTempOperationRecord;
+			GetDlgItem(IDC_EDIT_OPERATION_RECORD)->UpdateWindow();
+			m_EditOperationRecord.PostMessage(WM_VSCROLL, SB_BOTTOM, 0);
+			UpdateData(false);
+		}
+		else
+		{
+			char *chTempOperationRecord = (char *)malloc(sizeof(char) * (MAX_NODE_PATH_LENGTH + MAX_FILE_NUM));
+			sprintf_s(chTempOperationRecord, (MAX_NODE_PATH_LENGTH + MAX_FILE_NUM), "Delete <%S> From <%s> Success!\r\n", strNodePath, g_strAllRightFilePath[i].data());
+			m_OperationRecord += chTempOperationRecord;
+			GetDlgItem(IDC_EDIT_OPERATION_RECORD)->UpdateWindow();
+			m_EditOperationRecord.PostMessage(WM_VSCROLL, SB_BOTTOM, 0);
+			UpdateData(false);
 		}
 
 		stXmlFile->SaveFile();
@@ -621,7 +655,7 @@ void CXML_Operate_MFCDlg::OnBnClickedDelNode()
 			stXmlFile = NULL;
 		}
 	}
-
+	MessageBox(_T("Delete Node From XML Files Finish!"), _T("Finish"), MB_OK);
 	
 }
 
@@ -669,7 +703,7 @@ RESULT_TYPE_E GetValueFromXmlFile(TiXmlElement *pRoot, const char *szNodePath, c
 	if (NULL == pElement)
 	{
 		cout << "GetValueFromXmlFile, can not find " << szNodePath << endl;
-		return RESULT_FAIL;
+		return RESULT_CANNOT_FIND_ELEMENT;
 	}
 	strncpy_s(szElementValue, MAX_NODE_VALUE_LENGTH, pElement->GetText(), MAX_NODE_VALUE_LENGTH);
 
@@ -714,9 +748,6 @@ RESULT_TYPE_E SetValueToXmlFile(TiXmlElement *pRoot, const char *szNodePath, cha
 	TiXmlText  newText(szElementValue);
 	RightElement->ReplaceChild(pNode[i], newText);
 	return RESULT_SUCCESS;
-	
-
-	return RESULT_SUCCESS;
 }
 
 RESULT_TYPE_E AddNodeToXml(TiXmlElement *pRoot, const char *szNodePath, const char *szNodeName, const char *szValue)
@@ -726,7 +757,7 @@ RESULT_TYPE_E AddNodeToXml(TiXmlElement *pRoot, const char *szNodePath, const ch
 	if (NULL == pElement)
 	{
 		cout << "GetValueFromXmlFile, can not find " << szNodePath << endl;
-		return RESULT_FAIL;
+		return RESULT_CANNOT_FIND_ELEMENT;
 	}
 	// 生成子节点：pNewNode
 	TiXmlElement *pNewNode = new TiXmlElement(szNodeName);
