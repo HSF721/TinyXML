@@ -197,6 +197,7 @@ CXML_Operate_MFCDlg::CXML_Operate_MFCDlg(CWnd* pParent /*=NULL*/)
 	, m_NodePath(_T("Node1;Node12;Node122;value1"))
 	, m_NodeValueNow(_T(""))
 	, m_NodeValueNew(_T(""))
+	, m_OperationRecord(_T(""))
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -215,6 +216,8 @@ void CXML_Operate_MFCDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_NODE_PATH, m_EditNodePath);
 	DDX_Control(pDX, IDC_NODE_VALUE_NOW, m_EditNodeValueNow);
 	DDX_Control(pDX, IDC_NODE_VALUE_NEW, m_EditNodeValueNew);
+	DDX_Control(pDX, IDC_OPERATION_RECORD, m_EditOperationRecord);
+	DDX_Text(pDX, IDC_OPERATION_RECORD, m_OperationRecord);
 }
 
 BEGIN_MESSAGE_MAP(CXML_Operate_MFCDlg, CDialogEx)
@@ -321,7 +324,7 @@ void CXML_Operate_MFCDlg::OnBnClickedGetNodeValue()
 {
 	// TODO: 在此添加控件通知处理程序代码
 
-	
+	UpdateData(true);
 	g_strAllRightFilePath.clear();
 	TiXmlElement *pRoot = NULL;
 	RESULT_TYPE_E enRet = (RESULT_TYPE_E)0;
@@ -374,7 +377,13 @@ void CXML_Operate_MFCDlg::OnBnClickedGetNodeValue()
 		enRet = GetValueFromXmlFile(pRoot, "Node1;Node12;Node122;value1", szElementValue);
 		if (RESULT_SUCCESS == enRet)
 		{
-			MessageBox(_T("Get Value From Xml File Success!"), _T("正确"), MB_OK);
+//			CString cstrOutPutString = _T("hello\nworld347\n");
+//			GetDlgItem(IDC_EDIT_OPERATION_RECORD)->SetWindowText(cstrOutPutString);
+			char *chTempOperationRecord = (char *)malloc(sizeof(char) * (MAX_NODE_PATH_LENGTH + MAX_FILE_NUM));
+			sprintf_s(chTempOperationRecord, (MAX_NODE_PATH_LENGTH + MAX_FILE_NUM), "Get <%S> From <%s> Success Success\r\n", strNodePath, g_strAllRightFilePath[i].data());
+			m_OperationRecord += chTempOperationRecord;
+			GetDlgItem(IDC_EDIT_OPERATION_RECORD)->UpdateWindow();
+			UpdateData(false);
 		}
 		else
 		{
@@ -384,7 +393,7 @@ void CXML_Operate_MFCDlg::OnBnClickedGetNodeValue()
 		//	string strElementValue = szElementValue;
 		CString strElementValue(szElementValue);
 		GetDlgItem(IDC_NODE_VALUE_NOW)->SetWindowText(strElementValue);
-
+		GetDlgItem(IDC_NODE_VALUE_NOW)->UpdateWindow();
 		if (NULL != szElementValue)
 		{
 			free(szElementValue);

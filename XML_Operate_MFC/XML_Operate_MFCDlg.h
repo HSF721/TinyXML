@@ -90,4 +90,6 @@ public:
 	CEdit m_EditNodePath;
 	CEdit m_EditNodeValueNow;
 	CEdit m_EditNodeValueNew;
+	CEdit m_EditOperationRecord;
+	CString m_OperationRecord;
 };
