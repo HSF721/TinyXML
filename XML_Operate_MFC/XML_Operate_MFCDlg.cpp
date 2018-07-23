@@ -188,10 +188,11 @@ CXML_Operate_MFCDlg::CXML_Operate_MFCDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_XML_OPERATE_MFC_DIALOG, pParent)
 	, m_FilePath(_T("E:\\ConfigFile"))
 	, m_FileName(_T("config.xml"))
-	, m_NodePath(_T("Node1;Node12;Node122;value1"))
-	, m_NodeValueNow(_T(""))
-	, m_NodeValueNew(_T(""))
-	, m_OperationRecord(_T(""))
+	, m_NodePath(_T("Node1;Node12;Node121;value1"))
+	, m_NodeValueNow(_T("0"))
+	, m_NodeValueNew(_T("0"))
+	, m_OperationRecord(_T("操作记录：\r\n-----------------------------------------------------------------------\r\n"))
+	, m_NewNodeName(_T("Something"))
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -212,6 +213,8 @@ void CXML_Operate_MFCDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_NODE_VALUE_NEW, m_EditNodeValueNew);
 	DDX_Control(pDX, IDC_OPERATION_RECORD, m_EditOperationRecord);
 	DDX_Text(pDX, IDC_OPERATION_RECORD, m_OperationRecord);
+	DDX_Control(pDX, IDC_NEW_NODE_NAME, m_EditNewNodeName);
+	DDX_Text(pDX, IDC_NEW_NODE_NAME, m_NewNodeName);
 }
 
 BEGIN_MESSAGE_MAP(CXML_Operate_MFCDlg, CDialogEx)
@@ -368,24 +371,24 @@ void CXML_Operate_MFCDlg::OnBnClickedGetNodeValue()
 
 		char *szElementValue = (char *)malloc(sizeof(char) * MAX_NODE_VALUE_LENGTH);
 
-		enRet = GetValueFromXmlFile(pRoot, "Node1;Node12;Node122;value1", szElementValue);
+		enRet = GetValueFromXmlFile(pRoot, szNodePath, szElementValue);
 		if (RESULT_SUCCESS == enRet)
 		{
 //			CString cstrOutPutString = _T("hello\nworld347\n");
 //			GetDlgItem(IDC_EDIT_OPERATION_RECORD)->SetWindowText(cstrOutPutString);
 			char *chTempOperationRecord = (char *)malloc(sizeof(char) * (MAX_NODE_PATH_LENGTH + MAX_FILE_NUM));
-			sprintf_s(chTempOperationRecord, (MAX_NODE_PATH_LENGTH + MAX_FILE_NUM), "Get <%S> From <%s> Success\r\n", strNodePath, g_strAllRightFilePath[i].data());
+			sprintf_s(chTempOperationRecord, (MAX_NODE_PATH_LENGTH + MAX_FILE_NUM), "Get <%S> From <%s> Success, Value is:[%s]\r\n", strNodePath, g_strAllRightFilePath[i].data(), szElementValue);
 			m_OperationRecord += chTempOperationRecord;
-			GetDlgItem(IDC_EDIT_OPERATION_RECORD)->UpdateWindow();
+			GetDlgItem(IDC_OPERATION_RECORD)->UpdateWindow();
 			m_EditOperationRecord.PostMessage(WM_VSCROLL, SB_BOTTOM, 0);
 			UpdateData(false);
 		}
 		else
 		{
 			char *chTempOperationRecord = (char *)malloc(sizeof(char) * (MAX_NODE_PATH_LENGTH + MAX_FILE_NUM));
-			sprintf_s(chTempOperationRecord, (MAX_NODE_PATH_LENGTH + MAX_FILE_NUM), "Get <%S> To <%s> Fail! Err Code is:%d\r\n", strNodePath, g_strAllRightFilePath[i].data(), enRet);
+			sprintf_s(chTempOperationRecord, (MAX_NODE_PATH_LENGTH + MAX_FILE_NUM), "Get <%S> From <%s> Fail! Err Code is:%d\r\n", strNodePath, g_strAllRightFilePath[i].data(), enRet);
 			m_OperationRecord += chTempOperationRecord;
-			GetDlgItem(IDC_EDIT_OPERATION_RECORD)->UpdateWindow();
+			GetDlgItem(IDC_OPERATION_RECORD)->UpdateWindow();
 			m_EditOperationRecord.PostMessage(WM_VSCROLL, SB_BOTTOM, 0);
 			UpdateData(false);
 		}
@@ -411,6 +414,7 @@ void CXML_Operate_MFCDlg::OnBnClickedGetNodeValue()
 void CXML_Operate_MFCDlg::OnBnClickedChangeNodeValue()
 {
 	// TODO: 在此添加控件通知处理程序代码
+	UpdateData(true);
 	g_strAllRightFilePath.clear();
 	TiXmlElement *pRoot = NULL;
 	RESULT_TYPE_E enRet = (RESULT_TYPE_E)0;
@@ -441,6 +445,15 @@ void CXML_Operate_MFCDlg::OnBnClickedChangeNodeValue()
 	char szTempNodePath[0x100];
 	::wsprintfA(szTempNodePath, "%ls", (LPCTSTR)strNodePath);
 	szNodePath = szTempNodePath;
+
+	CString strNodeValueNew;
+	m_EditNodeValueNew.GetWindowTextW(strNodeValueNew);
+	len = strNodeValueNew.GetLength();
+	char *szNodeValueNew = (char *)malloc(sizeof(char) * (len + 1));
+	memset(szNodeValueNew, 0, len + 1);
+	char szTempNodeValueNew[0x100];
+	::wsprintfA(szTempNodeValueNew, "%ls", (LPCTSTR)strNodeValueNew);
+	szNodeValueNew = szTempNodeValueNew;
 
 	visit(szFilePath, szFileName);
 	
@@ -463,13 +476,13 @@ void CXML_Operate_MFCDlg::OnBnClickedChangeNodeValue()
 				MessageBox(_T("Find Root Element Fail!"), _T("错误"), MB_OK | MB_ICONEXCLAMATION);
 				break;
 			}
-			enRet = SetValueToXmlFile(pRoot, "Node1;Node12;Node122;value1", "123467890");
+			enRet = SetValueToXmlFile(pRoot, szNodePath, szNodeValueNew);
 			if (RESULT_SUCCESS != enRet)
 			{
 				char *chTempOperationRecord = (char *)malloc(sizeof(char) * (MAX_NODE_PATH_LENGTH + MAX_FILE_NUM));
 				sprintf_s(chTempOperationRecord, (MAX_NODE_PATH_LENGTH + MAX_FILE_NUM), "Set <%S> To <%s> Fail! Err Code is:%d\r\n", strNodePath, g_strAllRightFilePath[i].data(), enRet);
 				m_OperationRecord += chTempOperationRecord;
-				GetDlgItem(IDC_EDIT_OPERATION_RECORD)->UpdateWindow();
+				GetDlgItem(IDC_OPERATION_RECORD)->UpdateWindow();
 				m_EditOperationRecord.PostMessage(WM_VSCROLL, SB_BOTTOM, 0);
 				UpdateData(false);
 				break;
@@ -479,7 +492,7 @@ void CXML_Operate_MFCDlg::OnBnClickedChangeNodeValue()
 				char *chTempOperationRecord = (char *)malloc(sizeof(char) * (MAX_NODE_PATH_LENGTH + MAX_FILE_NUM));
 				sprintf_s(chTempOperationRecord, (MAX_NODE_PATH_LENGTH + MAX_FILE_NUM), "Set <%S> To <%s> Success!\r\n", strNodePath, g_strAllRightFilePath[i].data());
 				m_OperationRecord += chTempOperationRecord;
-				GetDlgItem(IDC_EDIT_OPERATION_RECORD)->UpdateWindow();
+				GetDlgItem(IDC_OPERATION_RECORD)->UpdateWindow();
 				m_EditOperationRecord.PostMessage(WM_VSCROLL, SB_BOTTOM, 0);
 				UpdateData(false);
 				break;
@@ -494,12 +507,14 @@ void CXML_Operate_MFCDlg::OnBnClickedChangeNodeValue()
 		
 	}
 //	delete[]stXmlFile;
+	UpdateData(false);
 	MessageBox(_T("Set Value To XML Files Finish!"), _T("Finish"), MB_OK);
 }
 
 void CXML_Operate_MFCDlg::OnBnClickedAddNode()
 {
 	// TODO: 在此添加控件通知处理程序代码
+	UpdateData(true);
 	g_strAllRightFilePath.clear();
 	TiXmlElement *pRoot = NULL;
 	RESULT_TYPE_E enRet = (RESULT_TYPE_E)0;
@@ -531,6 +546,24 @@ void CXML_Operate_MFCDlg::OnBnClickedAddNode()
 	::wsprintfA(szTempNodePath, "%ls", (LPCTSTR)strNodePath);
 	szNodePath = szTempNodePath;
 
+	CString strNodeValueNew;
+	m_EditNodeValueNew.GetWindowTextW(strNodeValueNew);
+	len = strNodeValueNew.GetLength();
+	char *szNodeValueNew = (char *)malloc(sizeof(char) * (len + 1));
+	memset(szNodeValueNew, 0, len + 1);
+	char szTempNodeValueNew[0x100];
+	::wsprintfA(szTempNodeValueNew, "%ls", (LPCTSTR)strNodeValueNew);
+	szNodeValueNew = szTempNodeValueNew;
+
+	CString strNewNodeName;
+	m_EditNewNodeName.GetWindowTextW(strNewNodeName);
+	len = strNewNodeName.GetLength();
+	char *szNewNodeName = (char *)malloc(sizeof(char) * (len + 1));
+	memset(szNewNodeName, 0, len + 1);
+	char szTempNewNodeName[0x100];
+	::wsprintfA(szTempNewNodeName, "%ls", (LPCTSTR)strNewNodeName);
+	szNewNodeName = szTempNewNodeName;
+
 	visit(szFilePath, szFileName);
 	for (int i = 0; i < g_strAllRightFilePath.size(); i++)
 	{
@@ -546,13 +579,13 @@ void CXML_Operate_MFCDlg::OnBnClickedAddNode()
 			MessageBox(_T("Find Root Element Fail!"), _T("错误"), MB_OK | MB_ICONEXCLAMATION);
 		}
 
-		enRet = AddNodeToXml(pRoot, szNodePath, "value111", "13254235");
+		enRet = AddNodeToXml(pRoot, szNodePath, szNewNodeName, szNodeValueNew);
 		if (RESULT_SUCCESS != enRet)
 		{
 			char *chTempOperationRecord = (char *)malloc(sizeof(char) * (MAX_NODE_PATH_LENGTH + MAX_FILE_NUM));
 			sprintf_s(chTempOperationRecord, (MAX_NODE_PATH_LENGTH + MAX_FILE_NUM), "Add <%S> To <%s> Fail! Err Code is:%d\r\n", strNodePath, g_strAllRightFilePath[i].data(), enRet);
 			m_OperationRecord += chTempOperationRecord;
-			GetDlgItem(IDC_EDIT_OPERATION_RECORD)->UpdateWindow();
+			GetDlgItem(IDC_OPERATION_RECORD)->UpdateWindow();
 			m_EditOperationRecord.PostMessage(WM_VSCROLL, SB_BOTTOM, 0);
 			UpdateData(false);
 		}
@@ -561,7 +594,7 @@ void CXML_Operate_MFCDlg::OnBnClickedAddNode()
 			char *chTempOperationRecord = (char *)malloc(sizeof(char) * (MAX_NODE_PATH_LENGTH + MAX_FILE_NUM));
 			sprintf_s(chTempOperationRecord, (MAX_NODE_PATH_LENGTH + MAX_FILE_NUM), "Add <%S> To <%s> Success!\r\n", strNodePath, g_strAllRightFilePath[i].data());
 			m_OperationRecord += chTempOperationRecord;
-			GetDlgItem(IDC_EDIT_OPERATION_RECORD)->UpdateWindow();
+			GetDlgItem(IDC_OPERATION_RECORD)->UpdateWindow();
 			m_EditOperationRecord.PostMessage(WM_VSCROLL, SB_BOTTOM, 0);
 			UpdateData(false);
 		}
@@ -573,6 +606,7 @@ void CXML_Operate_MFCDlg::OnBnClickedAddNode()
 			stXmlFile = NULL;
 		}
 	}
+	UpdateData(false);
 	MessageBox(_T("Add Node To XML Files Finish!"), _T("Finish"), MB_OK);
 }
 
@@ -580,7 +614,7 @@ void CXML_Operate_MFCDlg::OnBnClickedAddNode()
 void CXML_Operate_MFCDlg::OnBnClickedDelNode()
 {
 	// TODO: 在此添加控件通知处理程序代码
-
+	UpdateData(true);
 	g_strAllRightFilePath.clear();
 	TiXmlElement *pRoot = NULL;
 	RESULT_TYPE_E enRet = (RESULT_TYPE_E)0;
@@ -633,7 +667,7 @@ void CXML_Operate_MFCDlg::OnBnClickedDelNode()
 			char *chTempOperationRecord = (char *)malloc(sizeof(char) * (MAX_NODE_PATH_LENGTH + MAX_FILE_NUM));
 			sprintf_s(chTempOperationRecord, (MAX_NODE_PATH_LENGTH + MAX_FILE_NUM), "Delete <%S> From <%s> Fail! Err Code is:%d\r\n", strNodePath, g_strAllRightFilePath[i].data(), enRet);
 			m_OperationRecord += chTempOperationRecord;
-			GetDlgItem(IDC_EDIT_OPERATION_RECORD)->UpdateWindow();
+			GetDlgItem(IDC_OPERATION_RECORD)->UpdateWindow();
 			m_EditOperationRecord.PostMessage(WM_VSCROLL, SB_BOTTOM, 0);
 			UpdateData(false);
 		}
@@ -642,7 +676,7 @@ void CXML_Operate_MFCDlg::OnBnClickedDelNode()
 			char *chTempOperationRecord = (char *)malloc(sizeof(char) * (MAX_NODE_PATH_LENGTH + MAX_FILE_NUM));
 			sprintf_s(chTempOperationRecord, (MAX_NODE_PATH_LENGTH + MAX_FILE_NUM), "Delete <%S> From <%s> Success!\r\n", strNodePath, g_strAllRightFilePath[i].data());
 			m_OperationRecord += chTempOperationRecord;
-			GetDlgItem(IDC_EDIT_OPERATION_RECORD)->UpdateWindow();
+			GetDlgItem(IDC_OPERATION_RECORD)->UpdateWindow();
 			m_EditOperationRecord.PostMessage(WM_VSCROLL, SB_BOTTOM, 0);
 			UpdateData(false);
 		}
@@ -655,6 +689,7 @@ void CXML_Operate_MFCDlg::OnBnClickedDelNode()
 			stXmlFile = NULL;
 		}
 	}
+	UpdateData(false);
 	MessageBox(_T("Delete Node From XML Files Finish!"), _T("Finish"), MB_OK);
 	
 }

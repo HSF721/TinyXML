@@ -92,4 +92,6 @@ public:
 	CEdit m_EditNodeValueNew;
 	CEdit m_EditOperationRecord;
 	CString m_OperationRecord;
+	CEdit m_EditNewNodeName;
+	CString m_NewNodeName;
 };
